@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGridLay
                             QComboBox, QTabWidget, QDialog, QProgressDialog,
                             QFileDialog, QMenu, QMenuBar, QAction, QMainWindow,
                             QApplication)
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, QThread
 from PyQt5.QtGui import QIcon
 
 # if FakeControllers is imported this is overwritten.
@@ -33,6 +33,28 @@ def nongui(fun):
 def timetostring(time_int, forfile=False):
     string_format = '%Y/%m/%d %H:%M:%S' if not forfile else '%Y-%m-%d-%H-%M-%S'
     return datetime.datetime.fromtimestamp(int(time_int)).strftime(string_format)
+
+# Parallel thread for 2D scan
+class Scan2DThread(QThread):
+
+    progress = pyqtSignal(int)
+    return_data = pyqtSignal(ScanData)
+
+    def __init__(self, step, start, scan_range, samples, samplefunc, camera):
+        QThread.__init__(self)
+        self.step = step
+        self.start_pos = start
+        self.scan_range = scan_range
+        self.samples = samples
+        self.samplefunc = samplefunc
+        self.camera = camera
+
+
+    def run(self):
+        data = self.camera.scan_image(self.start_pos, self.scan_range, self.step, display_time=False,
+                                    gui_prog=self.progress, plot_out=False,
+                                    samplefunc=self.samplefunc, n_samples=self.samples)
+        self.return_data.emit(data)
 
 class CameraGUI(QMainWindow):
 
@@ -114,32 +136,46 @@ class CameraGUI(QMainWindow):
         self.setWindowTitle('MWIR Camera')
         self.show()
 
-    # signal for communicating thread with progress bar
-    set_progress = pyqtSignal(int)
-    abort_image = pyqtSignal()
-
     def scan_2D(self, step, start, scan_range, samples, samplefunc):
         # disable button
         self.settings2d.button.setEnabled(False)
         # start progress dialog
-        progress_dialog = QProgressDialog('2D Scan in progress.', 'Abort', 0, int(scan_range[0]/step[0]))
-        progress_dialog.setWindowTitle('Scan Progress')
-        progress_dialog.setMinimumDuration(500)
-        self.set_progress.connect(progress_dialog.setValue)
-        progress_dialog.cancelled.connect(self.abort_image)
+        self.progress_dialog = QProgressDialog('2D Scan in progress.', 'Abort', 0, int(scan_range[0]/step[0]))
+        self.progress_dialog.setWindowTitle('Scan Progress')
+        self.progress_dialog.setMinimumDuration(500)
         # TODO: set signal for cancel button
         # run scan in parallel to gui
-        self.data = self.parallel_scan_2D(step, start, scan_range, samples, samplefunc, self.set_progress)
-        # close progress dialog
-        progress_dialog.close()
+        self.scan_thread = Scan2DThread(step, start, scan_range, samples, samplefunc, self.camera)
+        self.progress_dialog.canceled.connect(self.scan_2d_canceled)
+        self.scan_thread.return_data.connect(self.scan_2d_completed)
+        self.scan_thread.progress.connect(self.progress_dialog.setValue)
+        self.scan_thread.start()
+
+
+        # if scan_output is None:
+        #     print('None returned')
+        #     return
+        # else:
+        #     self.data = scan_output
+        # # close progress dialog
+        # progress_dialog.close()
+
+    def scan_2d_completed(self, data):
+        self.progress_dialog.close()
+        self.data = data
         # show result
         self.update_plot_2d()
         # save data to file
         fileName = 'ScanData/{pre}-{t}-2d.scandat'.format(
-                        pre=DATA_PREFIX, t=timetostring(self.data.timestamp, True))
+        pre=DATA_PREFIX, t=timetostring(self.data.timestamp, True))
         with open(fileName, 'wb') as f:
             pickle.dump(self.data, f)
-        # enable button
+            # enable button
+            self.settings2d.button.setEnabled(True)
+
+    def scan_2d_canceled(self):
+        self.progress_dialog.close()
+        self.scan_thread.terminate()
         self.settings2d.button.setEnabled(True)
 
     def update_plot_2d(self):
@@ -155,11 +191,11 @@ class CameraGUI(QMainWindow):
         # show 2d plot settings
         self.plot_settings_2d.setVisible(True)
 
-    @nongui
-    def parallel_scan_2D(self, step, start, scan_range, samples, samplefunc, progress_dialog):
-        return self.camera.scan_image(start, scan_range, step, display_time=False,
-                                    gui_prog=progress_dialog, plot_out=False,
-                                    samplefunc=samplefunc, n_samples=samples)
+    # @nongui
+    # def parallel_scan_2D(self, step, start, scan_range, samples, samplefunc, progress_dialog):
+    #     return self.camera.scan_image(start, scan_range, step, display_time=False,
+    #                                 gui_prog=progress_dialog, plot_out=False,
+    #                                 samplefunc=samplefunc, n_samples=samples)
 
 
     def scan_1D(self, axis, other_axis_pos, step, start, scan_range, samples, samplefunc):
