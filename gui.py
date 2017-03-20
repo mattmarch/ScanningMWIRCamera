@@ -76,6 +76,26 @@ class CameraGUI(QMainWindow):
         hBoxMain.addStretch(1)
         centralWidget.setLayout(hBoxMain)
 
+        self.init_menubar()
+
+        hBoxMain.addLayout(self.init_plot_panel())
+
+        # tabs for settings
+        settingsTabs = QTabWidget()
+        self.settings2d = SettingsTab2D(self.scan_2D)
+        self.settings1d = SettingsTab1D(self.scan_1D)
+        settingsTabs.addTab(self.settings2d, '2D')
+        settingsTabs.addTab(self.settings1d, '1D')
+
+
+        hBoxMain.addWidget(settingsTabs)
+
+        self.setWindowIcon(QIcon('Res/scan_icon.png'))
+        self.setGeometry(100, 100, 800, 500)
+        self.setWindowTitle('MWIR Camera')
+        self.show()
+
+    def init_menubar(self):
         # menu bar
         menuBar = self.menuBar()
         fileMenu = menuBar.addMenu('&File')
@@ -99,6 +119,7 @@ class CameraGUI(QMainWindow):
         saveCsvAction.triggered.connect(self.save_csv_file)
         fileMenu.addAction(saveCsvAction)
 
+    def init_plot_panel(self):
         # plot items
         self.plot_canvas = PlotCanvas()
         self.plot_info = QLabel('No plot to display.\n\n')
@@ -116,28 +137,13 @@ class CameraGUI(QMainWindow):
         plot_settings_2d_layout.addWidget(QLabel('Colour mapping: '))
         plot_settings_2d_layout.addWidget(self.colour_control)
         self.plot_settings_2d.setVisible(False)
-
         # vbox for plot
         vBoxPlot = QVBoxLayout()
         vBoxPlot.addStretch(1)
         vBoxPlot.addWidget(self.plot_canvas)
         vBoxPlot.addWidget(self.plot_info)
         vBoxPlot.addWidget(self.plot_settings_2d)
-
-        # tabs for settings
-        settingsTabs = QTabWidget()
-        self.settings2d = SettingsTab2D(self.scan_2D)
-        self.settings1d = SettingsTab1D(self.scan_1D)
-        settingsTabs.addTab(self.settings2d, '2D')
-        settingsTabs.addTab(self.settings1d, '1D')
-
-        hBoxMain.addLayout(vBoxPlot)
-        hBoxMain.addWidget(settingsTabs)
-
-        self.setWindowIcon(QIcon('Res/scan_icon.png'))
-        self.setGeometry(100, 100, 800, 500)
-        self.setWindowTitle('MWIR Camera')
-        self.show()
+        return vBoxPlot
 
     def scan_2D(self, step, start, scan_range, samples, samplefunc):
         # disable button
@@ -153,15 +159,6 @@ class CameraGUI(QMainWindow):
         self.scan_thread.progress.connect(self.progress_dialog.setValue)
         self.scan_thread.start()
 
-
-        # if scan_output is None:
-        #     print('None returned')
-        #     return
-        # else:
-        #     self.data = scan_output
-        # # close progress dialog
-        # progress_dialog.close()
-
     def scan_2d_completed(self, data):
         self.data = data
         # show result
@@ -175,7 +172,7 @@ class CameraGUI(QMainWindow):
             self.settings2d.button.setEnabled(True)
 
     def scan_2d_canceled(self):
-        self.progress_dialog.close()
+        # self.progress_dialog.close()
         self.scan_thread.abort()
         self.settings2d.button.setEnabled(True)
 
@@ -191,13 +188,6 @@ class CameraGUI(QMainWindow):
                                                 x_range=self.data.scan_range[0], y_range=self.data.scan_range[1]))
         # show 2d plot settings
         self.plot_settings_2d.setVisible(True)
-
-    # @nongui
-    # def parallel_scan_2D(self, step, start, scan_range, samples, samplefunc, progress_dialog):
-    #     return self.camera.scan_image(start, scan_range, step, display_time=False,
-    #                                 gui_prog=progress_dialog, plot_out=False,
-    #                                 samplefunc=samplefunc, n_samples=samples)
-
 
     def scan_1D(self, axis, other_axis_pos, step, start, scan_range, samples, samplefunc):
         # disable button
@@ -247,7 +237,7 @@ class CameraGUI(QMainWindow):
                 else:
                     self.update_plot_2d()
             except NameError:
-                # first scans performed don't define scan_axis (but are all 2d)
+                # first scans performed didn't implement scan_axis (but are all 2d)
                 self.update_plot_2d()
         else:
             # TODO: raise error
