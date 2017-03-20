@@ -49,12 +49,15 @@ class Scan2DThread(QThread):
         self.samplefunc = samplefunc
         self.camera = camera
 
+    def abort(self):
+        self.camera.end_flag = True
 
     def run(self):
         data = self.camera.scan_image(self.start_pos, self.scan_range, self.step, display_time=False,
                                     gui_prog=self.progress, plot_out=False,
                                     samplefunc=self.samplefunc, n_samples=self.samples)
-        self.return_data.emit(data)
+        if data is not None:
+            self.return_data.emit(data)
 
 class CameraGUI(QMainWindow):
 
@@ -140,10 +143,9 @@ class CameraGUI(QMainWindow):
         # disable button
         self.settings2d.button.setEnabled(False)
         # start progress dialog
-        self.progress_dialog = QProgressDialog('2D Scan in progress.', 'Abort', 0, int(scan_range[0]/step[0]))
+        self.progress_dialog = QProgressDialog('2D Scan in progress.', 'Abort', 0, int(scan_range[0]/step[0])-1)
         self.progress_dialog.setWindowTitle('Scan Progress')
         self.progress_dialog.setMinimumDuration(500)
-        # TODO: set signal for cancel button
         # run scan in parallel to gui
         self.scan_thread = Scan2DThread(step, start, scan_range, samples, samplefunc, self.camera)
         self.progress_dialog.canceled.connect(self.scan_2d_canceled)
@@ -161,7 +163,6 @@ class CameraGUI(QMainWindow):
         # progress_dialog.close()
 
     def scan_2d_completed(self, data):
-        self.progress_dialog.close()
         self.data = data
         # show result
         self.update_plot_2d()
@@ -175,7 +176,7 @@ class CameraGUI(QMainWindow):
 
     def scan_2d_canceled(self):
         self.progress_dialog.close()
-        self.scan_thread.terminate()
+        self.scan_thread.abort()
         self.settings2d.button.setEnabled(True)
 
     def update_plot_2d(self):

@@ -3,9 +3,9 @@ import pickle
 import time
 from dateutil.relativedelta import relativedelta
 
-# from FakeControllers import *       # for testing without using equipment
-from MotorController import *
-from AdcController import *
+from FakeControllers import *       # for testing without using equipment
+# from MotorController import *
+# from AdcController import *
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -33,6 +33,7 @@ class Camera:
         # initialise motor positions
         if reset_positions:
             self.init_positions()
+        self.end_flag = False
 
     def init_positions(self):
         self.motors.goto_endstop(0, -1)
@@ -54,7 +55,12 @@ class Camera:
         if display_time:
             start_time = time.time()
         for i in range(scan_range):
-            pixel_array += [self._scan_axis(1, start_pos[1], img_size[1], pixel_size[1], samplefunc, n_samples)]
+            row = self._scan_axis(1, start_pos[1], img_size[1], pixel_size[1], samplefunc, n_samples)
+            # handle aborted scan
+            if row is None:
+                return None
+            else:
+                pixel_array += [row]
             self.motors.move(0, pixel_size[0])
             if display_time and i > 0:
                 # calculate time remaining
@@ -113,6 +119,10 @@ class Camera:
         for i in range(int(scan_range/step_size)):
             self.motors.move(axis, step_size)
             data.append(self.adc.read(n_samples, samplefunc))
+            # abort scan
+            if self.end_flag:
+                self.end_flag = False
+                return None
         return data
 
     # Plot a row given a list of data
