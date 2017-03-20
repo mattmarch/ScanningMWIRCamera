@@ -69,8 +69,8 @@ class Camera:
                 t_remaining = relativedelta(seconds=round((1/fraction_complete - 1) * elapsed_time))
                 print('{perc}% complete: {t_m}m, {t_s}s remaining.'.format(perc=round(fraction_complete*100, 2),
                                                                             t_m=t_remaining.minutes, t_s=t_remaining.seconds))
-            # update gui progress bar
-            if gui_prog is not None:
+            # update gui progress bar (don't update if exiting)
+            if gui_prog is not None and not self.end_flag:
                 gui_prog.emit(i)
         # backup data
         with open('last_image_backup.scandat', 'wb') as f:

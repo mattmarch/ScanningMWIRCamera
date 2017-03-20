@@ -53,6 +53,8 @@ class Scan2DThread(QThread):
         self.camera.end_flag = True
 
     def run(self):
+        # ensure flag is set to False in case of problems with QProgressDialog exiting
+        self.camera.end_flag = False
         data = self.camera.scan_image(self.start_pos, self.scan_range, self.step, display_time=False,
                                     gui_prog=self.progress, plot_out=False,
                                     samplefunc=self.samplefunc, n_samples=self.samples)
