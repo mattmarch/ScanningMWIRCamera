@@ -3,9 +3,9 @@ import pickle
 import time
 from dateutil.relativedelta import relativedelta
 
-from FakeControllers import *       # for testing without using equipment
-# from MotorController import *
-# from AdcController import *
+# from FakeControllers import *       # for testing without using equipment
+from MotorController import *
+from AdcController import *
 
 import numpy as np
 from matplotlib import pyplot as plt
