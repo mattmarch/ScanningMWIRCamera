@@ -55,6 +55,7 @@ class PlotCanvas(FigureCanvas):
             else:
                 pyplot.xlabel('{} position (mm)'.format(self.plot_axis))
                 pyplot.ylabel('Intensity')
+                pyplot.grid()
             pyplot.show()
 
     def show_initial_figure(self):
