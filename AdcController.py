@@ -1,4 +1,5 @@
 import subprocess
+import math
 
 class AdcError(Exception):
 # Covering any problems with the ADC controller
