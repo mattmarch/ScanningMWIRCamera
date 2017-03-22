@@ -65,6 +65,7 @@ class PlotCanvas(FigureCanvas):
         imshow_args = {'X': numpy.transpose(data.data), 'interpolation': self.INTERPOLATIONS[interp], 'cmap': self.CMAPS[cmap],
                 'extent': [data.start[0], data.start[0]+data.scan_range[0], data.start[1]+data.scan_range[1], data.start[1]]}
         self.axis.imshow(**imshow_args)
+        self.axis.axis(imshow_args['extent'])
         self.draw()
         # create function for showing figure in interactive window
         self.draw_plot_func = lambda: pyplot.imshow(**imshow_args)
@@ -74,6 +75,7 @@ class PlotCanvas(FigureCanvas):
     def update_plot_1d(self, data):
         self.axis.cla()
         self.axis.set_aspect('auto')
+        self.axis.axis([data.start, data.start+data.scan_range, 0, max(data.data)])
         self.axis.grid(True)
         plot_args = [numpy.arange(data.start, data.start+data.scan_range+data.step, data.step), data.data]
         # TODO: fix this hack work out why lists end up different lengths!
