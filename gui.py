@@ -1,4 +1,4 @@
-import os, sys, datetime, csv
+import os, sys, datetime, csv, time
 from PyQt5.QtWidgets import (QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGridLayout,
                             QComboBox, QTabWidget, QDialog, QProgressDialog,
                             QFileDialog, QMenu, QMenuBar, QAction, QMainWindow,
@@ -194,9 +194,18 @@ class CameraGUI(QMainWindow):
     def scan_1D(self, axis, other_axis_pos, step, start, scan_range, samples, samplefunc):
         # disable button
         self.settings1d.button.setEnabled(False)
+        # create progress bar
+        self.progress_dialog = QProgressDialog('1D Scan in progress.', 'Abort', 0, 0)
+        self.progress_dialog.setWindowTitle('Scan Progress')
+        self.progress_dialog.setRange(0, 0)
+        self.progress_dialog.setValue(0)
+        # self.progress_dialog.show()
         # scan and update
         self.data = self.parallel_scan_1D(axis, other_axis_pos, step, start, scan_range,
                                             samples, samplefunc)
+        # time.sleep(5)
+        self.progress_dialog.setMaximum(100)
+        self.progress_dialog.setValue(100)
         self.update_plot_1d()
         # save data to file
         fileName = 'ScanData/{pre}-{t}-1d.scandat'.format(
@@ -207,6 +216,7 @@ class CameraGUI(QMainWindow):
         self.settings1d.button.setEnabled(True)
 
     def update_plot_1d(self):
+        time.sleep(5)
         self.plot_canvas.update_plot_1d(self.data)
         # update plot info
         self.plot_info.setText('1D Scan along {axis} axis taken at {time}.\n'
