@@ -40,13 +40,11 @@ class Scan2DThread(QThread):
     progress = pyqtSignal(int)
     return_data = pyqtSignal(ScanData)
 
-    def __init__(self, step, start, scan_range, samples, samplefunc, camera):
+    def __init__(self, step, start, scan_range, camera):
         QThread.__init__(self)
         self.step = step
         self.start_pos = start
         self.scan_range = scan_range
-        self.samples = samples
-        self.samplefunc = samplefunc
         self.camera = camera
 
     def abort(self):
@@ -56,8 +54,7 @@ class Scan2DThread(QThread):
         # ensure flag is set to False in case of problems with QProgressDialog exiting
         self.camera.end_flag = False
         data = self.camera.scan_image(self.start_pos, self.scan_range, self.step, display_time=False,
-                                    gui_prog=self.progress, plot_out=False,
-                                    samplefunc=self.samplefunc, n_samples=self.samples)
+                                    gui_prog=self.progress)
         if data is not None:
             self.return_data.emit(data)
 
@@ -150,16 +147,22 @@ class CameraGUI(QMainWindow):
     def scan_2D(self, step, start, scan_range, samples, samplefunc):
         # disable button
         self.settings2d.button.setEnabled(False)
+        # set camera sampling methods
+        self.camera.set_sampling_variables(samples, samplefunc)
         # start progress dialog
         self.progress_dialog = QProgressDialog('2D Scan in progress.', 'Abort', 0, int(scan_range[0]/step[0])-1)
         self.progress_dialog.setWindowTitle('Scan Progress')
         self.progress_dialog.setMinimumDuration(500)
         # run scan in parallel to gui
-        self.scan_thread = Scan2DThread(step, start, scan_range, samples, samplefunc, self.camera)
+        self.scan_thread = Scan2DThread(step, start, scan_range, self.camera)
         self.progress_dialog.canceled.connect(self.scan_2d_canceled)
         self.scan_thread.return_data.connect(self.scan_2d_completed)
         self.scan_thread.progress.connect(self.progress_dialog.setValue)
         self.scan_thread.start()
+
+    def set_sampling_variables(self, samples, samplefunc):
+        self.camera.N_SAMPLES = samples
+        self.camera.SAMPLING_FUNC = samplefunc
 
     def scan_2d_completed(self, data):
         self.data = data
@@ -194,6 +197,8 @@ class CameraGUI(QMainWindow):
     def scan_1D(self, axis, other_axis_pos, step, start, scan_range, samples, samplefunc):
         # disable button
         self.settings1d.button.setEnabled(False)
+        # update sampling variables
+        self.set_sampling_variables(samples, samplefunc)
         # create progress bar
         self.progress_dialog = QProgressDialog('1D Scan in progress.', 'Abort', 0, 0)
         self.progress_dialog.setWindowTitle('Scan Progress')
@@ -201,8 +206,7 @@ class CameraGUI(QMainWindow):
         self.progress_dialog.setValue(0)
         # self.progress_dialog.show()
         # scan and update
-        self.data = self.parallel_scan_1D(axis, other_axis_pos, step, start, scan_range,
-                                            samples, samplefunc)
+        self.data = self.parallel_scan_1D(axis, other_axis_pos, step, start, scan_range)
         # time.sleep(5)
         self.progress_dialog.setMaximum(100)
         self.progress_dialog.setValue(100)
@@ -230,9 +234,8 @@ class CameraGUI(QMainWindow):
 
 
     @nongui
-    def parallel_scan_1D(self, axis, other_axis_pos, step, start, scan_range, samples, samplefunc):
-        return self.camera.scan_row(axis, other_axis_pos, start, scan_range, step,
-                                    samplefunc, samples, False)
+    def parallel_scan_1D(self, axis, other_axis_pos, step, start, scan_range):
+        return self.camera.scan_row(axis, other_axis_pos, start, scan_range, step)
 
     def open_file(self):
         fileName = QFileDialog.getOpenFileName(self, 'Select a data file to open.',
