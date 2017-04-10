@@ -3,9 +3,9 @@ import pickle
 import time
 from dateutil.relativedelta import relativedelta
 
-# from FakeControllers import *       # for testing without using equipment
-from MotorController import *
-from AdcController import *
+from FakeControllers import *       # for testing without using equipment
+# from MotorController import *
+# from AdcController import *
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -40,8 +40,8 @@ class Camera:
         self.motors.goto_endstop(1, -1)
 
     # Scan Image where arguments: start_pos, img_size and pixel_size are all 2 element tuples or lists
-    def scan_image(self, start_pos, img_size, pixel_size, save_as='output.bmp',
-                    display_time=True, gui_prog=None, plot_out=True,
+    def scan_image(self, start_pos, img_size, pixel_size,
+                    display_time=True, gui_prog=None,
                     samplefunc=None, n_samples=None):
         # see if sampling information is provided
         samplefunc = self.SAMPLING_FUNC if samplefunc == None else samplefunc
@@ -68,18 +68,13 @@ class Camera:
                 elapsed_time = time.time() - start_time
                 t_remaining = relativedelta(seconds=round((1/fraction_complete - 1) * elapsed_time))
                 print('{perc}% complete: {t_m}m, {t_s}s remaining.'.format(perc=round(fraction_complete*100, 2),
-                                                                            t_m=t_remaining.minutes, t_s=t_remaining.seconds))
+                                                            t_m=t_remaining.minutes, t_s=t_remaining.seconds))
             # update gui progress bar (don't update if exiting)
             if gui_prog is not None and not self.end_flag:
                 gui_prog.emit(i)
-        # backup data
-        with open('last_image_backup.scandat', 'wb') as f:
-            pickle.dump(pixel_array, f)
-        # plot or return data array
-        if plot_out:
-            self._plot_2d(pixel_array, start_pos, pixel_size)
-        else:
-            return ScanData(pixel_size, start_pos, img_size, pixel_array, time.time())
+        # return data object
+        return ScanData(pixel_size, start_pos, img_size, pixel_array, time.time())
+
 
     # Scan row
     def scan_row(self, axis, other_axis_pos, start_pos, scan_range, step_size,
