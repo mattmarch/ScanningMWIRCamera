@@ -29,7 +29,7 @@ class Camera:
         self.motors = MotorController()
         self.adc = AdcController()
         self.SAMPLING_FUNC = 'rms2'
-        self.SAMPLES_PER_PIXEL = 5
+        self.N_SAMPLES = 5
         # initialise motor positions
         if reset_positions:
             self.init_positions()
@@ -41,11 +41,7 @@ class Camera:
 
     # Scan Image where arguments: start_pos, img_size and pixel_size are all 2 element tuples or lists
     def scan_image(self, start_pos, img_size, pixel_size,
-                    display_time=True, gui_prog=None,
-                    samplefunc=None, n_samples=None):
-        # see if sampling information is provided
-        samplefunc = self.SAMPLING_FUNC if samplefunc == None else samplefunc
-        n_samples = self.SAMPLES_PER_PIXEL if n_samples == None else n_samples
+                    display_time=True, gui_prog=None):
         # move axis 0 to start
         self.motors.move_absolute(0, start_pos[0])
         # scan over range
@@ -55,7 +51,7 @@ class Camera:
         if display_time:
             start_time = time.time()
         for i in range(scan_range):
-            row = self._scan_axis(1, start_pos[1], img_size[1], pixel_size[1], samplefunc, n_samples)
+            row = self._scan_axis(1, start_pos[1], img_size[1], pixel_size[1])
             # handle aborted scan
             if row is None:
                 return None
@@ -77,20 +73,13 @@ class Camera:
 
 
     # Scan row
-    def scan_row(self, axis, other_axis_pos, start_pos, scan_range, step_size,
-                samplefunc=None, n_samples=None, plot_out=True):
-        # see if sampling information is provided
-        samplefunc = self.SAMPLING_FUNC if samplefunc == None else samplefunc
-        n_samples = self.SAMPLES_PER_PIXEL if n_samples == None else n_samples
+    def scan_row(self, axis, other_axis_pos, start_pos, scan_range, step_size):
         # move other axis to start
         if other_axis_pos is not None:
             self.motors.move_absolute(int(not axis), other_axis_pos)
         # scan row and plot output
-        data = self._scan_axis(axis, start_pos, scan_range, step_size, samplefunc, n_samples)
-        if plot_out:
-            self._plot_row(data, start_pos, step_size)
-        else:
-            return ScanData(step_size, start_pos, scan_range, data, time.time(), axis, other_axis_pos)
+        data = self._scan_axis(axis, start_pos, scan_range, step_size)
+        return ScanData(step_size, start_pos, scan_range, data, time.time(), axis, other_axis_pos)
 
     # Close communication with ADC and motors
     def close(self):
@@ -104,16 +93,16 @@ class Camera:
         self._plot_row(data, start, step)
 
     # Scan along an axis and return list of values
-    def _scan_axis(self, axis, start_pos, scan_range, step_size, samplefunc, n_samples):
+    def _scan_axis(self, axis, start_pos, scan_range, step_size):
         data = []
         # move to start
         self.motors.move_absolute(axis, start_pos)
-        # take first value
-        data.append(self.adc.read(n_samples, samplefunc))
+        # read first value
+        data.append(self.adc.read(self.N_SAMPLES, self.SAMPLING_FUNC))
         # iterate over rest of values moving then adding value to the list
         for i in range(int(scan_range/step_size)):
             self.motors.move(axis, step_size)
-            data.append(self.adc.read(n_samples, samplefunc))
+            data.append(self.adc.read(self.N_SAMPLES, self.SAMPLING_FUNC))
             # abort scan
             if self.end_flag:
                 self.end_flag = False
