@@ -92,6 +92,11 @@ class Camera:
             data = pickle.load(f)
         self._plot_row(data, start, step)
 
+    def set_sampling_variables(self, samples, samplefunc):
+        self.N_SAMPLES = samples
+        self.SAMPLING_FUNC = samplefunc
+
+
     # Scan along an axis and return list of values
     def _scan_axis(self, axis, start_pos, scan_range, step_size):
         data = []

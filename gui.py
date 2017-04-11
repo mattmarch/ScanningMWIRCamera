@@ -160,10 +160,6 @@ class CameraGUI(QMainWindow):
         self.scan_thread.progress.connect(self.progress_dialog.setValue)
         self.scan_thread.start()
 
-    def set_sampling_variables(self, samples, samplefunc):
-        self.camera.N_SAMPLES = samples
-        self.camera.SAMPLING_FUNC = samplefunc
-
     def scan_2d_completed(self, data):
         self.data = data
         # show result
@@ -198,7 +194,7 @@ class CameraGUI(QMainWindow):
         # disable button
         self.settings1d.button.setEnabled(False)
         # update sampling variables
-        self.set_sampling_variables(samples, samplefunc)
+        self.camera.set_sampling_variables(samples, samplefunc)
         # create progress bar
         self.progress_dialog = QProgressDialog('1D Scan in progress.', 'Abort', 0, 0)
         self.progress_dialog.setWindowTitle('Scan Progress')
