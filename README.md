@@ -1,4 +1,6 @@
 # ScanningMWIRCamera
+This is an old version of the software which still runs on 64 bit Python.
+
 Python based software for controlling and displaying output of the MWIR scanning camera built for my undergraduate Engineering Part IIB Project.
 
 It interfaces with a Melles Griot Nanostep Master Control Unit to control sensor position using NI-VISA via pyvisa.
