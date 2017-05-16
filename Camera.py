@@ -23,6 +23,15 @@ class ScanData:
         self.scan_axis = scan_axis
         self.off_axis_pos = off_axis_pos
 
+# decorator to initialise controllers at start and end of calls
+def initialise_controllers(func):
+    def wrapped_function(self, *args, **kwargs):
+        self.adc.open()
+        result = func(self, *args, **kwargs)
+        self.adc.close()
+        return result
+    return wrapped_function
+
 class Camera:
     # Initialisation
     def __init__(self, reset_positions=True):
@@ -40,10 +49,9 @@ class Camera:
         self.motors.goto_endstop(1, -1)
 
     # Scan Image where arguments: start_pos, img_size and pixel_size are all 2 element tuples or lists
+    @initialise_controllers
     def scan_image(self, start_pos, img_size, pixel_size, display_time=True,
                     gui_prog=None):
-        # open connection with adc
-        self.adc.open()
         # move axis 0 to start
         self.motors.move_absolute(0, start_pos[0])
         # scan over range
@@ -70,14 +78,14 @@ class Camera:
             # update gui progress bar (don't update if exiting)
             if gui_prog is not None and not self.end_flag:
                 gui_prog.emit(i)
-        # close adc Connection
-        self.adc.close()
         # return data object
         return ScanData(pixel_size, start_pos, img_size, pixel_array, time.time())
 
 
     # Scan row
+    @initialise_controllers
     def scan_row(self, axis, other_axis_pos, start_pos, scan_range, step_size):
+
         # move other axis to start
         if other_axis_pos is not None:
             self.motors.move_absolute(int(not axis), other_axis_pos)
@@ -88,8 +96,7 @@ class Camera:
     # Close communication with ADC and motors
     def close(self):
         self.motors.close()
-        self.adc.close()
-
+        
     # Plot data stored in 'last_image_backup'
     def plot_backup(self, start=(0,0), step=(0,0)):
         with open('last_image_backup', 'rb') as f:

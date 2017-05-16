@@ -47,6 +47,9 @@ class AdcController():
         pass
         # will need to start subprocess when not running simple control.
 
+    def open(self):
+        pass
+
     def close(self):
         pass
         # kill subprocess
