@@ -42,6 +42,8 @@ class Camera:
     # Scan Image where arguments: start_pos, img_size and pixel_size are all 2 element tuples or lists
     def scan_image(self, start_pos, img_size, pixel_size, display_time=True,
                     gui_prog=None):
+        # open connection with adc
+        self.adc.open()
         # move axis 0 to start
         self.motors.move_absolute(0, start_pos[0])
         # scan over range
@@ -68,6 +70,8 @@ class Camera:
             # update gui progress bar (don't update if exiting)
             if gui_prog is not None and not self.end_flag:
                 gui_prog.emit(i)
+        # close adc Connection
+        self.adc.close()
         # return data object
         return ScanData(pixel_size, start_pos, img_size, pixel_array, time.time())
 
