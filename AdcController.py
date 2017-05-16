@@ -20,8 +20,7 @@ class AdcController():
 
     def open(self):
         # TODO: use search to find board if not in 0
-        success = self.f_open(0)
-        if success == -1:
+        if self.f_open(0) == -1:
             raise AdcError('Connection to board unsuccessful.')
 
     # read samples in from ADC and apply func to find value to return
