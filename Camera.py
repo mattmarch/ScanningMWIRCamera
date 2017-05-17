@@ -49,8 +49,8 @@ class Camera:
 
     # Scan Image where arguments: start_pos, img_size and pixel_size are all 2 element tuples or lists
     @initialise_controllers
-    def scan_image(self, start_pos, img_size, pixel_size, display_time=True,
-                    gui_prog=None):
+    def scan_image(self, start_pos, img_size, pixel_size,
+                    display_time=True, gui_prog=None):
         # move axis 0 to start
         self.motors.move_absolute(0, start_pos[0])
         # scan over range
