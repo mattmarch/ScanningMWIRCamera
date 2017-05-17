@@ -24,8 +24,8 @@ class PlotCanvas(FigureCanvas):
     ])
 
 
-    def __init__(self, width=5, height=4, dpi=100):
-        self.fig = Figure(figsize=(width,height), dpi=dpi)
+    def __init__(self, dpi=100):
+        self.fig = Figure(figsize=(1000,1000), dpi=dpi)
         self.axis = self.fig.add_subplot(111)
 
         # function None when nothing to show on plot.
