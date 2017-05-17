@@ -62,33 +62,28 @@ class CameraGUI(QMainWindow):
 
     def __init__(self):
         super().__init__()
-
         self.initUI()
         self.camera = Camera()
 
     def initUI(self):
-
         # main layout
         centralWidget = QWidget()
         self.setCentralWidget(centralWidget)
         hBoxMain = QHBoxLayout()
         hBoxMain.addStretch(1)
         centralWidget.setLayout(hBoxMain)
-
+        # menubar
         self.init_menubar()
-
+        # plot panel
         hBoxMain.addLayout(self.init_plot_panel())
-
         # tabs for settings
         settingsTabs = QTabWidget()
         self.settings2d = SettingsTab2D(self.scan_2D)
         self.settings1d = SettingsTab1D(self.scan_1D)
         settingsTabs.addTab(self.settings2d, '2D')
         settingsTabs.addTab(self.settings1d, '1D')
-
-
         hBoxMain.addWidget(settingsTabs)
-
+        # window settings
         self.setWindowIcon(QIcon('Res/scan_icon.png'))
         self.setGeometry(100, 100, 800, 500)
         self.setWindowTitle('MWIR Camera')
