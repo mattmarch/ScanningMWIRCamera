@@ -3,6 +3,8 @@ import time
 
 DATA_PREFIX = 'fake'
 
+import visa
+
 class MotorControllerError(Exception):
 # Unexpected behaviour of motor stage controller
     pass
@@ -15,7 +17,21 @@ class MotorControllerInvalidCommandError(Exception):
 class MotorController:
     # Initialisation
     def __init__(self):
-        self.position = [0, 0]
+        # empty variables show connection is not yet established
+        self.instrument = None
+        self.position = [None, None]
+
+    # open connection to instrument
+    def open_instrument(self):
+        self.instrument = 1
+        self.test_instrument_connection()
+        self.init_positions()
+
+    # test connection to instrument, allow several attempts as errors may occur after connection established.
+    def test_instrument_connection(self, attempts=5):
+        # check connection has been established previously
+        if self.instrument is None:
+            raise MotorControllerError('Must connect controller before connection can be tested.')
 
     # close connection safely
     def close(self):
@@ -23,18 +39,31 @@ class MotorController:
 
     # move axis by given distance (in mm)
     def move(self, axis, distance):
-        self.position[axis] += distance
-        # time.sleep(0.000001)
+        pass
 
     # send axis to endstop (positive for max, negative for min), resets position to 0
     def goto_endstop(self, axis, end):
+        # check sign of end
+        if end == 0:
+            raise ValueError('Parameter "end" in "goto_endstop" must not be positive or negative (not 0).')
+        try:
+            end_sign = (end>0) - (end<0)
+        except ValueError:
+            raise ValueError('Parameter "end" in "goto_endstop" must not be type int or float.')
+        # move past end (thus stop at endstop)
+        self.move(axis, end_sign*60)
+        # if self._check_endstop(axis) != end_sign:
+        #     raise MotorControllerError('Did not reach endstop when expected.')
         self.position[axis] = 0
+
+    def init_positions(self):
+        self.goto_endstop(0, -1)
+        self.goto_endstop(1, -1)
 
     # move to absolute position relative to object's reference
     def move_absolute(self, axis, to_position):
-        self.position[axis] = to_position
-        time.sleep(0.02)
-
+            distance = to_position - self.position[axis]
+            self.move(axis, distance)
 
 class AdcError(Exception):
 # Covering any problems with the ADC controller

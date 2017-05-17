@@ -26,6 +26,12 @@ class ScanData:
 # decorator to initialise controllers at start and end of calls
 def initialise_controllers(func):
     def wrapped_function(self, *args, **kwargs):
+        # test motor controller connection
+        try:
+            self.motors.test_instrument_connection()
+        except MotorControllerError:
+            self.motors.open_instrument()
+        # connect to adc
         self.adc.open()
         result = func(self, *args, **kwargs)
         self.adc.close()
@@ -39,14 +45,7 @@ class Camera:
         self.adc = AdcController()
         self.SAMPLING_FUNC = 'rms2'
         self.N_SAMPLES = 5
-        # initialise motor positions
-        if reset_positions:
-            self.init_positions()
         self.end_flag = False
-
-    def init_positions(self):
-        self.motors.goto_endstop(0, -1)
-        self.motors.goto_endstop(1, -1)
 
     # Scan Image where arguments: start_pos, img_size and pixel_size are all 2 element tuples or lists
     @initialise_controllers
@@ -93,10 +92,10 @@ class Camera:
         data = self._scan_axis(axis, start_pos, scan_range, step_size)
         return ScanData(step_size, start_pos, scan_range, data, time.time(), axis, other_axis_pos)
 
-    # Close communication with ADC and motors
+    # Close communication with motors
     def close(self):
         self.motors.close()
-        
+
     # Plot data stored in 'last_image_backup'
     def plot_backup(self, start=(0,0), step=(0,0)):
         with open('last_image_backup', 'rb') as f:

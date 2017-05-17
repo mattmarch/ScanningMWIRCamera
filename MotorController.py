@@ -13,24 +13,36 @@ class MotorController:
     # Initialisation
     def __init__(self):
         self.rm = visa.ResourceManager()
+        # empty variables show connection is not yet established
+        self.instrument = None
+        self.position = [None, None]
+
+    # open connection to instrument
+    def open_instrument(self):
         connected_devices = self.rm.list_resources()
         # TODO: logic to select correct controller
         try:
             device_name = connected_devices[0]
         except IndexError:
-            raise MotorControllerError('No connected devices found while initialising MotorController.')
+            raise MotorControllerError('No connected devices found while initialising MotorController connection.')
         self.instrument = self.rm.open_resource(device_name, timeout=6000)
-        # test connection (allow 5 attempts in case system not closed safely)
+        self.test_instrument_connection()
+        self.init_positions()
+
+    # test connection to instrument, allow several attempts as errors may occur after connection established.
+    def test_instrument_connection(self, attempts=5):
+        # check connection has been established previously
+        if self.instrument is None:
+            raise MotorControllerError('Must connect controller before connection can be tested.')
+
         EXPECTED_RESULT = 'MELLES GRIOT NANOSTEP'
-        for i in range(5):
+        for i in range(attempts):
             test_result = self._query('*IDN?')
             if test_result == EXPECTED_RESULT:
                 break
         else:
             # all 5 attempts unsuccessful
             raise MotorStageBehaviourError('"*IDN?" not returning expected result. Expected "{expected}", received "{received}"'.format(expected=EXPECTED_RESULT, received=test_result))
-        # initialise position variable
-        self.position = [0, 0]
 
     # close connection safely
     def close(self):
@@ -56,6 +68,10 @@ class MotorController:
         if self._check_endstop(axis) != end_sign:
             raise MotorControllerError('Did not reach endstop when expected.')
         self.position[axis] = 0
+
+    def init_positions(self):
+        self.goto_endstop(0, -1)
+        self.goto_endstop(1, -1)
 
     # move to absolute position relative to object's reference
     def move_absolute(self, axis, to_position):
