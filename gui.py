@@ -273,6 +273,12 @@ class CameraGUI(QMainWindow):
             writer = csv.writer(f)
             writer.writerows(self.data.data)
 
+    # close necessary features when app exited
+    def closeEvent(self, event):
+        self.camera.close()
+        print('closed')
+        event.accept()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
