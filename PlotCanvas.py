@@ -35,16 +35,12 @@ class PlotCanvas(FigureCanvas):
 
         FigureCanvas.__init__(self, self.fig)
 
-        # set to interactive mode (supresses event loop message)
-        pyplot.ion()
-
         # connect mouse click
         self.fig.canvas.mpl_connect('button_press_event', self.clicked)
 
         # set figure sizing properties
         FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
-
 
     def clicked(self, event):
         if self.draw_plot_func != None:
