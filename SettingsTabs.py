@@ -42,7 +42,7 @@ class BlankSettingsTab(QWidget):
         # sampling mode select
         layout.addWidget(QLabel('Sampling function: '), 1, 0, 1, 1)
         self.sampling_mode = QComboBox()
-        self.sampling_mode.addItems(['Squared RMS', 'RMS', 'Average', 'Sum', 'Max'])
+        self.sampling_mode.addItems(['RMS', 'Squared RMS', 'Average', 'Sum', 'Max'])
         layout.addWidget(self.sampling_mode, 1, 1, 1, 1)
 
         self.vLayout.addLayout(layout)
