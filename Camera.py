@@ -79,7 +79,10 @@ class Camera:
             self.motors.move_absolute(int(not axis), other_axis_pos)
         # scan row and plot output
         data = self._scan_axis(axis, start_pos, scan_range, step_size)
-        return ScanData(step_size, start_pos, scan_range, data, time.time(), axis, other_axis_pos)
+        if data is None:
+            return None
+        else:
+            return ScanData(step_size, start_pos, scan_range, data, time.time(), axis, other_axis_pos)
 
     # Close communication with motors
     def close(self):
