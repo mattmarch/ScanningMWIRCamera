@@ -46,5 +46,4 @@ class Scan1DThread(QThread):
         self.camera.end_flag = False
         data = self.camera.scan_row(self.axis, self.other_axis_pos, self.start_pos, self.scan_range, self.step)
         if data is not None:
-            print('data returned')
             self.return_data.emit(data)
