@@ -14,22 +14,6 @@ from SettingsTabs import SettingsTab1D, SettingsTab2D
 from ScanThreads import Scan2DThread, Scan1DThread
 from Camera import *
 
-# decorator to run process in background from StackOverflow http://stackoverflow.com/a/30092938
-def nongui(fun):
-    """Decorator running the function in non-gui thread while
-    processing the gui events."""
-    from multiprocessing.pool import ThreadPool
-
-    def wrap(*args, **kwargs):
-        pool = ThreadPool(processes=1)
-        async = pool.apply_async(fun, args, kwargs)
-        while not async.ready():
-            async.wait(0.01)
-            QApplication.processEvents()
-        return async.get()
-
-    return wrap
-
 # function to get printable date from timestamp
 def timetostring(time_int, forfile=False):
     string_format = '%Y/%m/%d %H:%M:%S' if not forfile else '%Y-%m-%d-%H-%M-%S'
@@ -138,15 +122,15 @@ class CameraGUI(QMainWindow):
         self.update_plot_2d()
         # save data to file
         fileName = 'ScanData/{pre}-{t}-2d.scandat'.format(
-        pre=DATA_PREFIX, t=timetostring(self.data.timestamp, True))
+            pre=DATA_PREFIX, t=timetostring(self.data.timestamp, True))
         with open(fileName, 'wb') as f:
             pickle.dump(self.data, f)
-            # enable button
-            self.settings2d.button.setEnabled(True)
+        # enable button
+        self.settings2d.button.setEnabled(True)
 
     def scan_2d_canceled(self):
-        # self.progress_dialog.close()
         self.scan_thread.abort()
+        # self.progress_dialog.close()
         self.settings2d.button.setEnabled(True)
 
     def update_plot_2d(self):
@@ -172,23 +156,31 @@ class CameraGUI(QMainWindow):
         self.progress_dialog.setWindowTitle('Scan Progress')
         self.progress_dialog.setRange(0, 0)
         self.progress_dialog.setValue(0)
-        # self.progress_dialog.show()
-        # scan and update
-        self.data = self.parallel_scan_1D(axis, other_axis_pos, step, start, scan_range)
-        # time.sleep(5)
-        self.progress_dialog.setMaximum(100)
-        self.progress_dialog.setValue(100)
+        self.progress_dialog.show()
+        self.scan_thread = Scan1DThread(axis, other_axis_pos, step, start, scan_range, self.camera)
+        self.scan_thread.return_data.connect(self.scan_1d_completed)
+        self.progress_dialog.canceled.connect(self.scan_1d_canceled)
+        self.scan_thread.start()
+
+    def scan_1d_completed(self, data):
+        self.progress_dialog.close()
+        self.data = data
+        # show result
         self.update_plot_1d()
         # save data to file
         fileName = 'ScanData/{pre}-{t}-1d.scandat'.format(
-                        pre=DATA_PREFIX, t=timetostring(self.data.timestamp, True))
+            pre=DATA_PREFIX, t=timetostring(self.data.timestamp, True))
         with open(fileName, 'wb') as f:
             pickle.dump(self.data, f)
         # enable button
         self.settings1d.button.setEnabled(True)
 
+    def scan_1d_canceled(self):
+        self.progress_dialog.close()
+        self.scan_thread.abort()
+        self.settings1d.button.setEnabled(True)
+
     def update_plot_1d(self):
-        time.sleep(5)
         self.plot_canvas.update_plot_1d(self.data)
         # update plot info
         self.plot_info.setText('1D Scan along {axis} axis taken at {time}.\n'
@@ -199,11 +191,6 @@ class CameraGUI(QMainWindow):
                 step=self.data.step*1000, scan_range=self.data.scan_range))
         # show 2d plot settings
         self.plot_settings_2d.setVisible(False)
-
-
-    @nongui
-    def parallel_scan_1D(self, axis, other_axis_pos, step, start, scan_range):
-        return self.camera.scan_row(axis, other_axis_pos, start, scan_range, step)
 
     def open_file(self):
         fileName = QFileDialog.getOpenFileName(self, 'Select a data file to open.',

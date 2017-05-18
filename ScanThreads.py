@@ -1,6 +1,8 @@
 from PyQt5.QtCore import pyqtSignal, QThread
 from ScanDataStruct import ScanData
 
+import time
+
 class Scan2DThread(QThread):
 
     progress = pyqtSignal(int)
@@ -27,3 +29,22 @@ class Scan2DThread(QThread):
 class Scan1DThread(QThread):
 
     return_data = pyqtSignal(ScanData)
+
+    def __init__(self, axis, other_axis_pos, step, start, scan_range, camera):
+        QThread.__init__(self)
+        self.axis = axis
+        self.other_axis_pos = other_axis_pos
+        self.step = step
+        self.start_pos = start
+        self.scan_range = scan_range
+        self.camera = camera
+
+    def abort(self):
+        self.camera.end_flag = True
+
+    def run(self):
+        self.camera.end_flag = False
+        data = self.camera.scan_row(self.axis, self.other_axis_pos, self.start_pos, self.scan_range, self.step)
+        if data is not None:
+            print('data returned')
+            self.return_data.emit(data)
