@@ -62,9 +62,13 @@ class PlotCanvas(FigureCanvas):
         pass
 
     def update_plot_2d(self, data, interp, cmap):
+        self.axis.cla()
         self.axis.grid(False)
-        imshow_args = {'X': numpy.transpose(data.data), 'interpolation': self.INTERPOLATIONS[interp], 'cmap': self.CMAPS[cmap],
-                'extent': [data.start[0], data.start[0]+data.scan_range[0], data.start[1]+data.scan_range[1], data.start[1]]}
+        imshow_args = {
+            'X': numpy.transpose(data.data),
+            'interpolation': self.INTERPOLATIONS[interp],
+            'cmap': self.CMAPS[cmap],
+            'extent': [data.start[0], data.start[0]+data.scan_range[0], data.start[1]+data.scan_range[1], data.start[1]] }
         self.axis.imshow(**imshow_args)
         self.axis.axis(imshow_args['extent'])
         self.draw()
