@@ -271,7 +271,6 @@ class CameraGUI(QMainWindow):
     # close necessary features when app exited
     def closeEvent(self, event):
         self.camera.close()
-        print('closed')
         event.accept()
 
 
