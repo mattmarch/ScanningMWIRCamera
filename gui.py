@@ -9,8 +9,9 @@ from PyQt5.QtGui import QIcon
 # if FakeControllers is imported this is overwritten.
 DATA_PREFIX = 'scan'
 
-from PlotCanvas import *
-from SettingsTabs import *
+from PlotCanvas import PlotCanvas
+from SettingsTabs import SettingsTab1D, SettingsTab2D
+from ScanThreads import Scan2DThread, Scan1DThread
 from Camera import *
 
 # decorator to run process in background from StackOverflow http://stackoverflow.com/a/30092938
@@ -33,30 +34,6 @@ def nongui(fun):
 def timetostring(time_int, forfile=False):
     string_format = '%Y/%m/%d %H:%M:%S' if not forfile else '%Y-%m-%d-%H-%M-%S'
     return datetime.datetime.fromtimestamp(int(time_int)).strftime(string_format)
-
-# Parallel thread for 2D scan
-class Scan2DThread(QThread):
-
-    progress = pyqtSignal(int)
-    return_data = pyqtSignal(ScanData)
-
-    def __init__(self, step, start, scan_range, camera):
-        QThread.__init__(self)
-        self.step = step
-        self.start_pos = start
-        self.scan_range = scan_range
-        self.camera = camera
-
-    def abort(self):
-        self.camera.end_flag = True
-
-    def run(self):
-        # ensure flag is set to False in case of problems with QProgressDialog exiting
-        self.camera.end_flag = False
-        data = self.camera.scan_image(self.start_pos, self.scan_range, self.step, display_time=False,
-                                    gui_prog=self.progress)
-        if data is not None:
-            self.return_data.emit(data)
 
 class CameraGUI(QMainWindow):
 
