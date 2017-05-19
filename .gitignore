@@ -1,0 +1,4 @@
+# ignore all pycache files
+__pycache__
+lib/__pycache__
+GUI/__pycache__
