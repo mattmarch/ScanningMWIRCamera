@@ -115,7 +115,7 @@ class CameraGUI(QMainWindow):
         self.progress_dialog.canceled.connect(self.scan_2d_canceled)
         self.scan_thread.return_data.connect(self.scan_2d_completed)
         self.scan_thread.progress.connect(self.progress_dialog.setValue)
-        self.scan_thread.error_passback.connect(lambda e, msg: ErrorMessage(e, msg))
+        self.scan_thread.error_passback.connect(lambda e, msg: self.scan_error(e, msg, self.settings2d.button))
         self.scan_thread.start()
 
     def scan_2d_completed(self, data):
@@ -162,6 +162,7 @@ class CameraGUI(QMainWindow):
         self.scan_thread = Scan1DThread(axis, other_axis_pos, step, start, scan_range, self.camera)
         self.scan_thread.return_data.connect(self.scan_1d_completed)
         self.progress_dialog.canceled.connect(self.scan_1d_canceled)
+        self.scan_thread.error_passback.connect(lambda e, msg: self.scan_error(e, msg, self.settings1d.button))
         self.scan_thread.start()
 
     def scan_1d_completed(self, data):
@@ -242,6 +243,10 @@ class CameraGUI(QMainWindow):
         self.camera.close()
         event.accept()
 
+    # if error in scan, displays message and enables button
+    def scan_error(self, e, msg, button):
+        ErrorMessage(e, msg)
+        button.setEnabled(True)
 
 if __name__ == '__main__':
     # set ID so Windows displays correct taskbar icon (from StackOverflow: http://stackoverflow.com/a/1552105)

@@ -1,5 +1,5 @@
 import visa
-from CustomExceptions import MotorControllerInvalidCommandError, MotorControllerError
+from CustomExceptions import MotorControllerInvalidCommandError, MotorControllerError, MotorControllerConnectionError
 
 class MotorController:
     # Initialisation
@@ -38,7 +38,8 @@ class MotorController:
 
     # close connection safely
     def close(self):
-        self.instrument.close()
+        if self.instrument is not None:
+            self.instrument.close()
 
     # move axis by given distance (in mm)
     def move(self, axis, distance):

@@ -6,9 +6,9 @@ from dateutil.relativedelta import relativedelta
 
 sys.path.insert(0, './lib')
 
-from FakeControllers import *       # for testing without using equipment
-# from MotorController import *
-# from AdcController import *
+# from FakeControllers import *       # for testing without using equipment
+from MotorController import *
+from AdcController import *
 
 from ScanDataStruct import ScanData
 from CustomExceptions import ImageDimensionError
