@@ -6,6 +6,10 @@ class MotorControllerInvalidCommandError(Exception):
 # Invalid command sent via GPIB
     pass
 
+class MotorControllerConnectionError(Exception):
+# Cannot connect to Motor controller
+    pass
+
 class ImageDimensionError(Exception):
     # raised if invalid input into image dimensions
     pass

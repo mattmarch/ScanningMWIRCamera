@@ -16,7 +16,7 @@ class MotorController:
         try:
             device_name = connected_devices[0]
         except IndexError:
-            raise MotorControllerError('No connected devices found while initialising MotorController connection.')
+            raise MotorControllerConnectionError('No connected devices found while initialising MotorController connection.')
         self.instrument = self.rm.open_resource(device_name, timeout=6000)
         self.test_instrument_connection()
         self.init_positions()
