@@ -1,3 +1,6 @@
+# import VisaIOError
+from pyvisa.errors import VisaIOError
+
 class MotorControllerError(Exception):
 # Unexpected behaviour of motor stage controller
     pass

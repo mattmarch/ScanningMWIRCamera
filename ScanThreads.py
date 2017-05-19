@@ -3,8 +3,6 @@ from ScanDataStruct import ScanData
 from CustomExceptions import *
 import types
 
-import time
-
 def camera_exception_handler(func):
     def wrapped_scan_thread(self):
         try:
@@ -12,6 +10,18 @@ def camera_exception_handler(func):
         except ImageDimensionError as e:
             # catch invalid inputs
             self.error_passback.emit(e, 'Invalid settings for image dimensions.\nSee "Show Details" for info.')
+        except AdcError as e:
+            # cannot establish ADC connection
+            self.error_passback.emit(e, 'Cannot connect to ADC board, ensure USB is plugged in.')
+        except MotorControllerInvalidCommandError as e:
+            # communication with motor controller resulted in error_passback
+            self.error_passback.emit(e, 'Communication with motor controller failed, try switching on and off and restarting software.')
+        except MotorControllerConnectionError as e:
+            # cannot connect to Motor controller
+            self.error_passback.emit(e, 'Cannot connect to motor controller, ensure USB is plugged in.')
+        except VisaIOError as e:
+            # lost connection to MotorController and timed out
+            self.error_passback.emit(e, 'Lost connection to motor controller (timed out), ensure USB is plugged in.')
     return wrapped_scan_thread
 
 
