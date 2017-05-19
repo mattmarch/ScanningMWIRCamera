@@ -1,7 +1,10 @@
 import numpy
 import pickle
 import time
+import os, sys
 from dateutil.relativedelta import relativedelta
+
+sys.path.insert(0, './lib')
 
 from FakeControllers import *       # for testing without using equipment
 # from MotorController import *

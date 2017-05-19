@@ -9,11 +9,11 @@ from PyQt5.QtGui import QIcon
 # if FakeControllers is imported this is overwritten.
 DATA_PREFIX = 'scan'
 
-from PlotCanvas import PlotCanvas
-from SettingsTabs import SettingsTab1D, SettingsTab2D
-from ScanThreads import Scan2DThread, Scan1DThread
-from ErrorMessage import ErrorMessage
 from Camera import *
+from GUI.PlotCanvas import PlotCanvas
+from GUI.SettingsTabs import SettingsTab1D, SettingsTab2D
+from GUI.ScanThreads import Scan2DThread, Scan1DThread
+from GUI.ErrorMessage import ErrorMessage
 
 # function to get printable date from timestamp
 def timetostring(time_int, forfile=False):
