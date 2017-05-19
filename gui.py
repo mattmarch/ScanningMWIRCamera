@@ -12,6 +12,7 @@ DATA_PREFIX = 'scan'
 from PlotCanvas import PlotCanvas
 from SettingsTabs import SettingsTab1D, SettingsTab2D
 from ScanThreads import Scan2DThread, Scan1DThread
+from ErrorMessage import ErrorMessage
 from Camera import *
 
 # function to get printable date from timestamp
@@ -198,7 +199,11 @@ class CameraGUI(QMainWindow):
         if fileName[0] == '':
             return
         with open(fileName[0], 'rb') as f:
-            data = pickle.load(f)
+            try:
+                data = pickle.load(f)
+            except pickle.UnpicklingError as e:
+                ErrorMessage(e, 'Could not load file. \nFile may be corrupted.')
+                return
         if type(data) is ScanData:
             self.data = data
             try:
