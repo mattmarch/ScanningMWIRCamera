@@ -12,6 +12,12 @@ from ScanDataStruct import ScanData
 import numpy as np
 from matplotlib import pyplot as plt
 
+# to check if image exceeds the limits of the stepper array
+IMAGE_LIMITS = ((0, 50), (0, 50))
+# and raise ImageDimensionError if it does
+class ImageDimensionError(Exception):
+    pass
+
 # decorator to initialise controllers at start and end of calls
 def initialise_controllers(func):
     def wrapped_function(self, *args, **kwargs):
@@ -32,7 +38,7 @@ class Camera:
     def __init__(self, reset_positions=True):
         self.motors = MotorController()
         self.adc = AdcController()
-        self.SAMPLING_FUNC = 'rms2'
+        self.SAMPLING_FUNC = 'rms'
         self.N_SAMPLES = 5
         self.end_flag = False
 
@@ -40,6 +46,7 @@ class Camera:
     @initialise_controllers
     def scan_image(self, start_pos, img_size, pixel_size,
                     display_time=True, gui_prog=None):
+        self.check2dDimensions(start_pos, img_size, pixel_size)
         # move axis 0 to start
         self.motors.move_absolute(0, start_pos[0])
         # scan over range
@@ -73,7 +80,7 @@ class Camera:
     # Scan row
     @initialise_controllers
     def scan_row(self, axis, other_axis_pos, start_pos, scan_range, step_size):
-
+        self.check1dDimensions(axis, other_axis_pos, start_pos, scan_range, step_size)
         # move other axis to start
         if other_axis_pos is not None:
             self.motors.move_absolute(int(not axis), other_axis_pos)
@@ -129,6 +136,62 @@ class Camera:
         plt.imshow(data, interpolation='nearest', cmap='inferno',
                 extent=[start[0], start[0]+step[0]*len(data[0]), start[1], start[1]+step[1]*len(data)])
         plt.show()
+
+    def check2dDimensions(self, start, img_size, step):
+        img_end = (start[0]+img_size[0], start[1]+img_size[1])
+        # check step is positive
+        if step[0] <= 0 or step[1] <= 0:
+            raise ImageDimensionError('Both step sizes (set to ({}, {})) must be > 0'.format(
+                step[0], step[1]))
+        # check positive image sizes
+        elif img_size[0] <= 0 or img_size[1] <= 0:
+            raise ImageDimensionError('Both image dimensions (set to ({}, {}) must be > 0)'.format(
+                img_size[0], img_size[1]))
+        # check step greater than image size
+        elif step[0] > img_size[0] or step[1] > img_size[1]:
+            raise ImageDimensionError('Step sizes (set to ({}, {})) must be less than image dimensions ({}, {})'.format(
+                step[0], step[1], img_size[0], img_size[1]))
+        # check start positions
+        elif start[0] < IMAGE_LIMITS[0][0] or start[0] > IMAGE_LIMITS[0][1]:
+            raise ImageDimensionError('x start position (set to {}) must be in range {} to {}'.format(
+                start[0], IMAGE_LIMITS[0][0], IMAGE_LIMITS[0][1]))
+        elif start[1] < IMAGE_LIMITS[1][0] or start[1] > IMAGE_LIMITS[1][1]:
+            raise ImageDimensionError('y start position (set to {}) must be in range {} to {}'.format(
+                start[1], IMAGE_LIMITS[1][0], IMAGE_LIMITS[1][1]))
+        # check end positions
+        elif img_end[0] < IMAGE_LIMITS[0][0] or img_end[0] > IMAGE_LIMITS[0][1]:
+            raise ImageDimensionError('x end (currently at {} + {} = {}) must be in range {} to {}'.format(
+                start[0], img_size[0], img_end[0], IMAGE_LIMITS[0][0], IMAGE_LIMITS[0][1]))
+        elif img_end[1] < IMAGE_LIMITS[1][0] or img_end[1] > IMAGE_LIMITS[1][1]:
+            raise ImageDimensionError('y end (currently at {} + {} = {}) must be in range {} to {}'.format(
+                start[1], img_size[1], img_end[1], IMAGE_LIMITS[1][0], IMAGE_LIMITS[1][1]))
+
+    def check1dDimensions(self, axis, other_axis_pos, start, img_size, step):
+        img_end = start + img_size
+        other_axis = 0 if axis else 1
+        axis_names = ('x', 'y')
+        # check step is positive
+        if step <= 0:
+            raise ImageDimensionError('Step size (set to {}) must be > 0'.format(step))
+        # check positive image sizes
+        elif img_size <= 0:
+            raise ImageDimensionError('Scan dimension (set to {}) must be > 0)'.format(img_size))
+        # check step greater than image size
+        elif step > img_size:
+            raise ImageDimensionError('Step size (set to {}) must be less than scan range ({})'.format(
+                step, img_size))
+        # check other axis is within range
+        elif other_axis_pos < IMAGE_LIMITS[other_axis][0] or other_axis_pos > IMAGE_LIMITS[other_axis][1]:
+            raise ImageDimensionError('{} position must be in range {} to {}'.format(
+                axis_names[other_axis], IMAGE_LIMITS[other_axis][0], IMAGE_LIMITS[other_axis][1]))
+        # check start position
+        elif start < IMAGE_LIMITS[axis][0] or start > IMAGE_LIMITS[axis][1]:
+            raise ImageDimensionError('Start position (set to {}) must be in range {} to {}'.format(
+                start, IMAGE_LIMITS[axis][0], IMAGE_LIMITS[axis][1]))
+        # check end position
+        elif img_end < IMAGE_LIMITS[axis][0] or img_end > IMAGE_LIMITS[axis][1]:
+            raise ImageDimensionError('End position (currently at {} + {} = {}) must be in range {} to {}'.format(
+                start, img_size, img_end, IMAGE_LIMITS[axis][0], IMAGE_LIMITS[axis][1]))
 
 if __name__ == '__main__':
     c = Camera()
