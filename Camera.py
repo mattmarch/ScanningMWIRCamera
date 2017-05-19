@@ -8,15 +8,13 @@ from FakeControllers import *       # for testing without using equipment
 # from AdcController import *
 
 from ScanDataStruct import ScanData
+from CustomExceptions import ImageDimensionError
 
 import numpy as np
 from matplotlib import pyplot as plt
 
 # to check if image exceeds the limits of the stepper array
 IMAGE_LIMITS = ((0, 50), (0, 50))
-# and raise ImageDimensionError if it does
-class ImageDimensionError(Exception):
-    pass
 
 # decorator to initialise controllers at start and end of calls
 def initialise_controllers(func):

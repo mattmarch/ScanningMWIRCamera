@@ -1,13 +1,5 @@
 import visa
-
-class MotorControllerError(Exception):
-# Unexpected behaviour of motor stage controller
-    pass
-
-class MotorControllerInvalidCommandError(Exception):
-# Invalid command sent via GPIB
-    pass
-
+from CustomExceptions import MotorControllerInvalidCommandError, MotorControllerError
 
 class MotorController:
     # Initialisation
@@ -42,7 +34,7 @@ class MotorController:
                 break
         else:
             # all 5 attempts unsuccessful
-            raise MotorStageBehaviourError('"*IDN?" not returning expected result. Expected "{expected}", received "{received}"'.format(expected=EXPECTED_RESULT, received=test_result))
+            raise MotorControllerError('"*IDN?" not returning expected result. Expected "{expected}", received "{received}"'.format(expected=EXPECTED_RESULT, received=test_result))
 
     # close connection safely
     def close(self):

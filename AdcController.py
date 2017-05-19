@@ -1,11 +1,9 @@
 import math
 import ctypes
 
-ADC_CHANNEL_USED = 1        # 1 or 2
+from CustomExceptions import AdcError
 
-class AdcError(Exception):
-# Covering any problems with the ADC controller
-    pass
+ADC_CHANNEL_USED = 1        # 1 or 2
 
 class AdcController():
 
