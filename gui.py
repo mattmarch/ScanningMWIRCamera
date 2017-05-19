@@ -1,4 +1,4 @@
-import os, sys, datetime, csv, time
+import os, sys, datetime, csv, time, ctypes
 from PyQt5.QtWidgets import (QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGridLayout,
                             QComboBox, QTabWidget, QDialog, QProgressDialog,
                             QFileDialog, QMenu, QMenuBar, QAction, QMainWindow,
@@ -46,7 +46,7 @@ class CameraGUI(QMainWindow):
         settingsTabs.addTab(self.settings1d, '1D')
         hBoxMain.addWidget(settingsTabs)
         # window settings
-        self.setWindowIcon(QIcon('Res/scan_icon.png'))
+        self.setWindowIcon(QIcon('Res/scan_icon2.png'))
         self.setGeometry(100, 100, 800, 500)
         self.setWindowTitle('MWIR Camera')
         self.show()
@@ -211,12 +211,11 @@ class CameraGUI(QMainWindow):
                     self.update_plot_1d()
                 else:
                     self.update_plot_2d()
-            except NameError:
+            except AttributeError:
                 # first scans performed didn't implement scan_axis (but are all 2d)
                 self.update_plot_2d()
         else:
-            # TODO: raise error
-            pass
+            ErrorMessage(None, 'File loaded but does not contain correct ScanData type.')
 
     def save_file(self):
 
@@ -244,6 +243,10 @@ class CameraGUI(QMainWindow):
 
 
 if __name__ == '__main__':
+    # set ID so Windows displays correct taskbar icon (from StackOverflow: http://stackoverflow.com/a/1552105)
+    myappid = 'MWIR_Camera.gui' # arbitrary string
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    # start GUI
     app = QApplication(sys.argv)
     ex = CameraGUI()
     sys.exit(app.exec_())
