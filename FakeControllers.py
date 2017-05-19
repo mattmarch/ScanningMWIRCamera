@@ -4,15 +4,7 @@ import time
 DATA_PREFIX = 'fake'
 
 import visa
-
-class MotorControllerError(Exception):
-# Unexpected behaviour of motor stage controller
-    pass
-
-class MotorControllerInvalidCommandError(Exception):
-# Invalid command sent via GPIB
-    pass
-
+from CustomExceptions import *
 
 class MotorController:
     # Initialisation
