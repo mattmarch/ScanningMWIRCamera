@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QMessageBox
 import traceback
+from CustomExceptions import *
 
 # Error message to display when
 class ErrorMessage(QMessageBox):

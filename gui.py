@@ -115,6 +115,7 @@ class CameraGUI(QMainWindow):
         self.progress_dialog.canceled.connect(self.scan_2d_canceled)
         self.scan_thread.return_data.connect(self.scan_2d_completed)
         self.scan_thread.progress.connect(self.progress_dialog.setValue)
+        self.scan_thread.error_passback.connect(lambda e, msg: ErrorMessage(e, msg))
         self.scan_thread.start()
 
     def scan_2d_completed(self, data):
