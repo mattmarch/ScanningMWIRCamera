@@ -229,7 +229,7 @@ class CameraGUI(QMainWindow):
 
     def save_csv_file(self):
         fileName = QFileDialog.getSaveFileName(self, 'Choose a location to save.',
-                    'Data/data-{}'.format(timetostring(self.data.timestamp, True)),
+                    'CsvData/data-{}'.format(timetostring(self.data.timestamp, True)),
                     'CSV File (*.csv)')
         if fileName[0] == '':
             return
