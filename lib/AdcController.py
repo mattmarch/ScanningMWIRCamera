@@ -3,7 +3,7 @@ import ctypes
 
 from CustomExceptions import AdcError
 
-ADC_CHANNEL_USED = 1        # 1 or 2
+ADC_CHANNEL_USED = 2       # 1 or 2
 
 class AdcController():
 
