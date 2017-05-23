@@ -19,9 +19,13 @@ def camera_exception_handler(func):
         except MotorControllerConnectionError as e:
             # cannot connect to Motor controller
             self.error_passback.emit(e, 'Cannot connect to motor controller, ensure USB is plugged in.')
+        except MotorControllerError as e:
+            # unexpected behaviour from Control Unit
+            self.error_passback.emit(e, 'Unexpected behaviour from Motor Control Unit, try resetting the unit.')
         except VisaIOError as e:
             # lost connection to MotorController and timed out
             self.error_passback.emit(e, 'Lost connection to motor controller (timed out), ensure USB is plugged in.')
+
     return wrapped_scan_thread
 
 
