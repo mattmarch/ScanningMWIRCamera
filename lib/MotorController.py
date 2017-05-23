@@ -42,10 +42,11 @@ class MotorController:
             self.instrument.close()
 
     # move axis by given distance (in mm)
-    def move(self, axis, distance):
+    def move(self, axis, distance, uncalibrated=False):
         if distance != 0:
             self._query('MR{a}={d}'.format(a=axis, d=distance))
-            self.position[axis] += distance
+            if not uncalibrated:
+                self.position[axis] += distance
 
     # send axis to endstop (positive for max, negative for min), resets position to 0
     def goto_endstop(self, axis, end):
@@ -57,7 +58,7 @@ class MotorController:
         except ValueError:
             raise ValueError('Parameter "end" in "goto_endstop" must not be type int or float.')
         # move past end (thus stop at endstop)
-        self.move(axis, end_sign*60)
+        self.move(axis, end_sign*60, True)
         if self._check_endstop(axis) != end_sign:
             raise MotorControllerError('Did not reach endstop when expected.')
         self.position[axis] = 0
