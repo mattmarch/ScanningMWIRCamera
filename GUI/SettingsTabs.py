@@ -36,7 +36,7 @@ class BlankSettingsTab(QWidget):
         # no. of samples select
         self.n_samples = QSpinBox()
         self.n_samples.setRange(1, 9999)
-        self.n_samples.setValue(5)
+        self.n_samples.setValue(20)
         layout.addWidget(self.n_samples, 0, 1, 1, 1)
 
         # sampling mode select
