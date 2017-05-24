@@ -34,12 +34,16 @@ class MotorController:
                 break
         else:
             # all 5 attempts unsuccessful
+            # disconnect instrument
+            self.instrument = None
+            # raise error
             raise MotorControllerError('"*IDN?" not returning expected result. Expected "{expected}", received "{received}"'.format(expected=EXPECTED_RESULT, received=test_result))
 
     # close connection safely
     def close(self):
         if self.instrument is not None:
             self.instrument.close()
+            self.instrument = None
 
     # move axis by given distance (in mm)
     def move(self, axis, distance, uncalibrated=False):
@@ -74,16 +78,25 @@ class MotorController:
 
     # Send a query via GPIB, returns response or raises MotorControllerInvalidCommandError if error returned
     def _query(self, message):
-        response = self.instrument.query(message)
-        if response == 'E':
-            raise MotorControllerInvalidCommandError('Invalid Command: "{}"'.format(message))
-        else:
-            return response
+        try:
+            response = self.instrument.query(message)
+            if response == 'E':
+                raise MotorControllerInvalidCommandError('Invalid Command: "{}"'.format(message))
+            else:
+                return response
+        except VisaIOError:
+            # timeout
+            # reset connection next time use is needed
+            self.instrument = None
+            raise
+
 
     # returns -1 if at axis min, 1 if at axis max, else 0
     def _check_endstop(self, axis):
         result = self._query('?L{}'.format(axis))
         if result == '11':
+            # disconnect instrument
+            self.instrument = None
             raise MotorControllerError('Both endstops triggered, this should be impossible.')
         try:
             return int(result[0]) - int(result[1])
