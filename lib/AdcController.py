@@ -17,7 +17,7 @@ class AdcController():
         self.close = ADC_DLL.CloseDevice
 
     def open(self):
-        # TODO: use search to find board if not in 0
+        # This assumes only one K8055 board is connected to computer
         if self.f_open(0) == -1:
             raise AdcError('Connection to board unsuccessful.')
 
