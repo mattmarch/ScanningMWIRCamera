@@ -117,6 +117,8 @@ class Camera:
         # iterate over rest of values moving then adding value to the list
         for i in range(int(scan_range/step_size)):
             self.motors.move(axis, step_size)
+            # add 50ms pause for sensor to adjust to new position and prevent smearing.
+            time.sleep(0.05)
             data.append(self.adc.read(self.N_SAMPLES, self.SAMPLING_FUNC))
             # abort scan
             if self.end_flag:
