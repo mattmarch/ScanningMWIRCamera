@@ -11,12 +11,20 @@ class MotorController:
 
     # open connection to instrument
     def open_instrument(self):
+        expected_device_name = 'GPIB0::6::INSTR'
         connected_devices = self.rm.list_resources()
-        # TODO: logic to select correct controller
-        try:
-            device_name = connected_devices[0]
-        except IndexError:
-            raise MotorControllerConnectionError('No connected devices found while initialising MotorController connection.')
+        if expected_device_name in connected_devices:
+            device_name = expected_device_name
+        else:
+            # try connecting to first connected device
+            # will work if device name is changed and only one instrument is connected to computer
+            try:
+                device_name = connected_devices[0]
+                # connect to first device but print a warning to console
+                print('Warning: expected address for motor controller ({}) not found, instead connnecting to {}'.format(
+                    expected_device_name, device_name))
+            except IndexError:
+                raise MotorControllerConnectionError('No connected devices found while initialising MotorController connection.')
         self.instrument = self.rm.open_resource(device_name, timeout=6000)
         self.test_instrument_connection()
         self.init_positions()
