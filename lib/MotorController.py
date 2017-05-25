@@ -1,5 +1,5 @@
 import visa
-from CustomExceptions import MotorControllerInvalidCommandError, MotorControllerError, MotorControllerConnectionError
+from lib.CustomExceptions import MotorControllerInvalidCommandError, MotorControllerError, MotorControllerConnectionError
 
 class MotorController:
     # Initialisation
