@@ -74,14 +74,15 @@ class PlotCanvas(FigureCanvas):
         self.plot_axis = None
 
     def update_plot_1d(self, data):
+        self.plot_axis = 'y' if data.scan_axis else 'x'
         self.axis.cla()
         self.axis.set_aspect('auto')
         self.axis.axis([data.start, data.start+data.scan_range, 0, max(data.data)])
         self.axis.grid(True)
         plot_args = [numpy.arange(data.start, data.start+data.scan_range+data.step, data.step), data.data]
-        # TODO: fix this hack work out why lists end up different lengths!
+        # in a couple of edge cases there's an off by one error here from integer division in different places
         plot_args[0] = plot_args[0][:len(plot_args[1])]
+        self.axis.set_xlabel('{} position (mm)'.format(self.plot_axis))
         self.axis.plot(*plot_args)
         self.draw()
         self.draw_plot_func = lambda: pyplot.plot(*plot_args)
-        self.plot_axis = 'y' if data.scan_axis else 'x'
