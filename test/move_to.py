@@ -1,4 +1,5 @@
 import sys
+sys.path.insert(0, '..')
 from lib.MotorController import *
 
 to_x = float(sys.argv[1])

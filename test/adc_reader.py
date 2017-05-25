@@ -1,5 +1,7 @@
+import sys, time
+sys.path.insert(0, '..')
+
 from lib.AdcController import *
-import time
 
 # initialise
 a = AdcController()
