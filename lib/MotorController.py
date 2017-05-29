@@ -110,18 +110,3 @@ class MotorController:
             return int(result[0]) - int(result[1])
         except (ValueError, IndexError):
             raise MotorControllerError('Erroneously received {} on endstop check'.format(result))
-
-    # FOLLOWING METHODS ARE NOT USED (AT LEAST YET)
-
-    # get absolute position from motor controller
-    def get_position(self, axis):
-        pos = self._query('?P{}'.format(axis))
-
-    # move to absolute position relative to controller's reference
-    def move_controller_absolute(self, axis, to_position):
-        self.position[axis] += to_position - self.get_position(axis)
-        self._query('MA{a}={p}'.format(a=axis, p=position))
-
-    # datum axis on controller
-    def _datum_axis(self, axis):
-        self._query('D{}'.format(axis))
