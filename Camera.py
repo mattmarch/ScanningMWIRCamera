@@ -195,8 +195,3 @@ class Camera:
         elif img_end < IMAGE_LIMITS[axis][0] or img_end > IMAGE_LIMITS[axis][1]:
             raise ImageDimensionError('End position (currently at {} + {} = {}) must be in range {} to {}'.format(
                 start, img_size, img_end, IMAGE_LIMITS[axis][0], IMAGE_LIMITS[axis][1]))
-
-if __name__ == '__main__':
-    c = Camera()
-    # c.scan_row(1, 29.3, 20, 30, 0.1)
-    c.scan_image((27,34), (4,3), (0.25,0.25))
