@@ -126,20 +126,6 @@ class Camera:
                 return None
         return data
 
-    # Plot a row given a list of data
-    def _plot_row(self, data, start, step):
-        x_vals = np.arange(start, start+step*len(data), step)
-        plt.plot(x_vals, data)
-        plt.xlabel('Position (mm)')
-        plt.ylabel('Relative intensity')
-        plt.show()
-
-    def _plot_2d(self, data, start, step):
-        # data transposed to show horizontal on x axis
-        plt.imshow(data, interpolation='nearest', cmap='inferno',
-                extent=[start[0], start[0]+step[0]*len(data[0]), start[1], start[1]+step[1]*len(data)])
-        plt.show()
-
     def check2dDimensions(self, start, img_size, step):
         img_end = (start[0]+img_size[0], start[1]+img_size[1])
         # check step is positive
