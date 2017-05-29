@@ -1,0 +1,11 @@
+# Setting up MWIR Scanning Camera on Windows
+
+Python 3 (32 bit) is required for this program to work. Download the latest version from www.python.org.
+With Python installed, access the command line and type the following commands to install the required packages:
+
+pip install PyQt5
+pip install pyvisa
+pip install numpy
+pip install matplotlib
+
+With these installed the program should now run by executing the .bat file "runMwirGui.bat".

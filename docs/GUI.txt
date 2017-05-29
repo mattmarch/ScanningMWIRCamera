@@ -1,0 +1,22 @@
+# Guide to using the GUI for the MWIR Scanning Camera.
+
+Setting up the Equipment:
+Connect Velleman ADC board to computer via USB.
+Connect motor control unit USB and switch on unit.
+Set up and switch on imaging subject.
+
+Running a scan:
+Start the program.
+The settings tabs on the right allows the parameters of the scan to be set up.
+There are 2 tabs, for 1D scans and 2D scans.
+Within the desired tab set up the scan properties, and click the button to begin the scan.
+A waiting dialogue should appear whilst the scan is in progress, the abort button can be pressed to cancel mid-scan.
+When the scan is complete the image will automatically appear on the left panel in the window.
+
+After a scan:
+After the scan is complete the image will have appeared and the data from the scan will have automatically backed up.
+To view the image in an interactive window simply click on the image.
+The image can be saved as either a .png file or a .csv file from within the "File" menubar dropdown.
+
+Loading past scans:
+Previous scans can be loaded from the auto-saved data using the load option within the "File" menubar dropdown.
