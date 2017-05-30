@@ -1,0 +1,50 @@
+# Interfacing with the Camera class from Python
+
+The camera class can be easily used from within a Python program.
+
+To import and initialise an instance of the class:
+
+  from Camera import *
+  # initialise
+  c = Camera()
+
+The sampling parameters can be set before a scan:
+
+  sample_n = 20
+  sample_func = 'rms'
+  c.set_sampling_variables(sample_n, sample_func)
+
+To perform a 2D scan:
+
+  # variables in form (x, y)
+  start = (20, 30)
+  img_size = (15, 15)
+  pixel_size = (0.1, 0.1)
+  scan = c.scan_image(start, img_size, pixel_size)
+  # or to supress output to console
+  scan = c.scan_image(start, img_size, pixel_size, display_time=False)
+
+For a 1D scan:
+
+  # x axis = 0, y axis = 1
+  axis = 0    # selects x axis
+  # y position
+  other_axis_pos = 30
+  start = 10
+  scan_range = 20
+  step = 0.1
+  scan = c.scan_row(axis, other_axis_pos, start, scan_range, step)
+
+The output will be a ScanData instance with the following properties accessible:
+
+  # setup for both 1D and 2D scans. Will be stored as floats for 1D, and tuples for 2D case.
+  scan.step
+  scan.start
+  scan.scan_range
+  # values obtained from scan, will be 1D array for 1D scan, 2D array for 2D scan
+  scan.data
+  # timestamp from end of scan
+  scan.timestamp
+  # 1D scan properties, will be set to None in case of 2D scan
+  scan.scan_axis
+  scan.off_axis_pos

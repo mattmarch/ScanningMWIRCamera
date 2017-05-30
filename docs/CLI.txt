@@ -1,0 +1,53 @@
+# How to use the command line interface for using the MWIR Scanning Camera Program.
+
+There are 2 usage modes:
+
+Usage (1d):
+CameraCLI 1d axis other_axis_pos start range step [--n_sample=value options]
+
+    axis - axis to scan with camera
+        options:
+            x
+            y
+    other_axis_pos - position of the other axis in mm
+    start - start position in mm
+    range - range of scan in mm
+    step - step size in mm
+    n_sample - determines samples per pixel (default = 20)
+    options:
+        sample_func - determines function to apply to sample (default rms)
+            -rms2 (rms squared)
+            -max
+            -average
+        output - determines the action to display the output (defaults to displaying plot)
+            -save_image (saves an image of the plot)
+            -save_csv (saves data as .csv)
+        cmap - determines colour mapping of output (default inferno)
+            -heat1
+            -heat2
+            -grey1
+            -grey2
+        interpolation - determines interpolation method (default nearest neighbour interpolation)
+            -linear (linear interpolation)
+            -cubic (cubic interpolation)
+            -sinc (sinc based interpolation)
+
+Example:
+    CameraCLI 1d x 20 10 30 0.1 --n_sample=40 -save_image -linear
+    Performs a 1d scan of x axis starting at 10mm, range of 30mm, with y = 20mm and step size 0.1mm. 40 samples per pixel, output set to save image with linear interpolation.
+
+
+Usage (2d):
+CameraCLI 2d start_x start_y range_x range_y step_x [step_y] [--n_sample=value options]
+
+    start_x - x start position in mm
+    start_y - y start position in mm
+    range_x - x range of scan in mm
+    range_y - y range of scan in mm
+    step_x - x step size in mm
+    step_y - y step size in mm (if not provided defaults to step_x
+    n_sample and options same as for 1d usage
+
+Example:
+    CameraCLI 2d 20 15 25 25 0.1 -max -heat1
+    Performs a 2d scan starting at (20mm, 15mm), covering a 25mm x 25mm square with 0.1mm step sizes in both directions. The maximum sampled value is picked and the colour mapping of output uses 'heat1'.
