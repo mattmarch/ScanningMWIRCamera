@@ -40,7 +40,7 @@ class Camera:
         self.motors = MotorController()
         self.adc = AdcController()
         self.SAMPLING_FUNC = 'rms'
-        self.N_SAMPLES = 5
+        self.N_SAMPLES = 20
         self.end_flag = False
 
     # Scan Image where arguments: start_pos, img_size and pixel_size are all 2 element tuples or lists
