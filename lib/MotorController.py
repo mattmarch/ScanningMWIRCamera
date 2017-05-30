@@ -92,7 +92,7 @@ class MotorController:
                 raise MotorControllerInvalidCommandError('Invalid Command: "{}"'.format(message))
             else:
                 return response
-        except VisaIOError:
+        except visa.VisaIOError:
             # timeout
             # reset connection next time use is needed
             self.instrument = None
