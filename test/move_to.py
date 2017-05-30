@@ -1,6 +1,6 @@
 import sys
-sys.path.insert(0, '..')
-from lib.MotorController import *
+sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
+from MotorController import *
 
 to_x = float(sys.argv[1])
 to_y = float(sys.argv[2])

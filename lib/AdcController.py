@@ -1,7 +1,7 @@
 import math
 import ctypes
 
-from lib.CustomExceptions import AdcError
+from CustomExceptions import AdcError
 
 ADC_CHANNEL_USED = 2       # 1 or 2
 

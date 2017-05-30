@@ -4,7 +4,7 @@ import time
 DATA_PREFIX = 'fake'
 
 import visa
-from lib.CustomExceptions import *
+from CustomExceptions import *
 
 class MotorController:
     # Initialisation

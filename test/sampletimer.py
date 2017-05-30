@@ -1,6 +1,6 @@
 # Simple script to determine the length of time it takes to perform a sample using the ADC
-sys.path.insert(0, '..')
-import time
+import sys, os, time
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from Camera import *
 
 

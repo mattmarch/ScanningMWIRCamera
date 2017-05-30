@@ -1,7 +1,7 @@
-import sys, time
-sys.path.insert(0, '..')
+import sys, os, time
+sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
 
-from lib.AdcController import *
+from AdcController import *
 
 # initialise
 a = AdcController()
